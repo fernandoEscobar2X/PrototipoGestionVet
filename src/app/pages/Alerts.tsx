@@ -168,7 +168,7 @@ export function Alerts() {
                 </span>
               )}
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Alertas y recordatorios</h1>
+            <h1 className="text-[1.75rem] font-bold tracking-tight text-slate-900 sm:text-3xl">Alertas y recordatorios</h1>
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
             Prioriza pendientes, notifica a clientes y mantente al dia sin perder claridad en pantallas pequenas.
@@ -177,7 +177,7 @@ export function Alerts() {
 
         <Dialog open={showNewReminderDialog} onOpenChange={setShowNewReminderDialog}>
           <DialogTrigger asChild>
-            <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 font-semibold text-white shadow-lg shadow-slate-900/10 transition-all hover:bg-slate-800 sm:w-auto">
+            <button className="btn-touch w-full bg-slate-900 text-white shadow-lg shadow-slate-900/10 transition-all hover:bg-slate-800 sm:w-auto">
               <Plus className="h-4 w-4" />
               Nuevo recordatorio
             </button>
@@ -186,12 +186,12 @@ export function Alerts() {
         </Dialog>
       </section>
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:rounded-[28px] sm:p-5">
         <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-600">
           <Filter className="h-4 w-4" />
           Filtrar por prioridad o ventana de tiempo
         </div>
-        <div className="mobile-chip-scroll">
+        <div className="flex flex-wrap gap-2">
           {filters.map((currentFilter) => (
             <button
               key={currentFilter.id}
@@ -211,7 +211,7 @@ export function Alerts() {
       </section>
 
       {filteredReminders.length === 0 ? (
-        <section className="rounded-[28px] border border-dashed border-slate-200 bg-white p-14 text-center shadow-sm">
+        <section className="rounded-[24px] border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm sm:rounded-[28px] sm:p-14">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50">
             <Bell className="h-10 w-10 text-slate-300" />
           </div>
@@ -231,7 +231,7 @@ export function Alerts() {
               <article
                 key={reminder.id}
                 className={[
-                  'rounded-[28px] border-2 bg-white p-5 shadow-sm transition-all hover:shadow-lg sm:p-6',
+                  'rounded-[24px] border-2 bg-white p-4 shadow-sm transition-all hover:shadow-lg sm:rounded-[28px] sm:p-6',
                   isOverdue ? 'border-red-200 bg-red-50/30' : 'border-slate-200',
                 ].join(' ')}
               >
@@ -304,7 +304,7 @@ export function Alerts() {
                     <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <button
                         onClick={() => handleComplete(reminder.id)}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+                        className="btn-touch-compact bg-emerald-50 text-emerald-700 transition-colors hover:bg-emerald-100"
                       >
                         <Check className="h-4 w-4" />
                         Completar
@@ -313,7 +313,7 @@ export function Alerts() {
                       {patient && (
                         <button
                           onClick={() => handleSendNotification(reminder.id)}
-                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition-colors hover:bg-blue-100"
+                          className="btn-touch-compact bg-blue-50 text-blue-700 transition-colors hover:bg-blue-100"
                         >
                           <MessageSquare className="h-4 w-4" />
                           Notificar
@@ -322,7 +322,7 @@ export function Alerts() {
 
                       <button
                         onClick={() => handleDismiss(reminder.id)}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100"
+                        className="btn-touch-compact bg-slate-50 text-slate-700 transition-colors hover:bg-slate-100"
                       >
                         <X className="h-4 w-4" />
                         Descartar
@@ -330,7 +330,7 @@ export function Alerts() {
 
                       <button
                         onClick={() => handleDelete(reminder.id)}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition-colors hover:bg-red-100 sm:ml-auto"
+                        className="btn-touch-compact bg-red-50 text-red-700 transition-colors hover:bg-red-100 sm:ml-auto"
                       >
                         Eliminar
                       </button>
@@ -375,14 +375,14 @@ export function Alerts() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <button
                       onClick={sendWhatsAppNotification}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-green-700"
+                      className="btn-touch w-full bg-green-600 text-white transition-colors hover:bg-green-700"
                     >
                       <Send className="h-4 w-4" />
                       Enviar por WhatsApp
                     </button>
                     <button
                       onClick={() => setShowNotificationDialog(false)}
-                      className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                      className="btn-touch w-full border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
                     >
                       Cancelar
                     </button>
@@ -445,7 +445,7 @@ function NewReminderDialog({
             onChange={(event) => setFormData({ ...formData, title: event.target.value })}
             required
             placeholder="Ej: Llamar a cliente sobre vacuna"
-            className="w-full rounded-2xl border border-slate-200 px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           />
         </div>
 
@@ -456,7 +456,7 @@ function NewReminderDialog({
             onChange={(event) => setFormData({ ...formData, description: event.target.value })}
             placeholder="Detalles adicionales..."
             rows={3}
-            className="w-full rounded-2xl border border-slate-200 px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           />
         </div>
 
@@ -465,7 +465,7 @@ function NewReminderDialog({
           <select
             value={formData.patient_id}
             onChange={(event) => setFormData({ ...formData, patient_id: event.target.value })}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           >
             <option value="">Sin asociar</option>
             {patients.map((patient) => (
@@ -484,7 +484,7 @@ function NewReminderDialog({
               value={formData.due_date}
               onChange={(event) => setFormData({ ...formData, due_date: event.target.value })}
               required
-              className="w-full rounded-2xl border border-slate-200 px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+              className="field-touch border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             />
           </div>
 
@@ -495,7 +495,7 @@ function NewReminderDialog({
               onChange={(event) =>
                 setFormData({ ...formData, priority: event.target.value as 'low' | 'medium' | 'high' | 'urgent' })
               }
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+              className="field-touch border border-slate-200 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             >
               <option value="low">Baja</option>
               <option value="medium">Media</option>
@@ -510,7 +510,7 @@ function NewReminderDialog({
           <select
             value={formData.type}
             onChange={(event) => setFormData({ ...formData, type: event.target.value })}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           >
             <option value="vaccine">Vacuna</option>
             <option value="checkup">Chequeo</option>
@@ -525,13 +525,13 @@ function NewReminderDialog({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto"
+            className="btn-touch w-full border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center rounded-2xl bg-teal-600 px-4 py-3 font-medium text-white transition-colors hover:bg-teal-700 sm:w-auto"
+            className="btn-touch w-full bg-teal-600 text-white transition-colors hover:bg-teal-700 sm:w-auto"
           >
             Crear recordatorio
           </button>

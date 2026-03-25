@@ -63,7 +63,7 @@ export function Layout() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] overflow-x-clip bg-slate-100 text-slate-900 lg:flex">
+    <div className="relative min-h-[100dvh] overflow-x-clip bg-transparent text-slate-900 lg:flex">
       {sidebarOpen && (
         <button
           type="button"
@@ -76,7 +76,7 @@ export function Layout() {
       <aside
         className={[
           'fixed inset-y-0 left-0 z-40 flex w-[min(20rem,88vw)] max-w-full flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:z-0 lg:h-[100dvh] lg:w-72 lg:translate-x-0 lg:shadow-none',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-[calc(100%+1rem)] pointer-events-none',
         ].join(' ')}
       >
         <div className="flex h-full flex-col">
@@ -164,7 +164,7 @@ export function Layout() {
             <div className="space-y-1.5">
               <button
                 type="button"
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 transition-all hover:bg-white hover:text-slate-900 hover:shadow-sm"
+                className="btn-touch-compact w-full justify-start rounded-xl text-slate-500 transition-all hover:bg-white hover:text-slate-900 hover:shadow-sm"
               >
                 <Settings className="h-4 w-4" />
                 <span>Configuracion</span>
@@ -172,7 +172,7 @@ export function Layout() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="group flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 hover:shadow-sm"
+                className="btn-touch-compact group w-full justify-start rounded-xl text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 hover:shadow-sm"
               >
                 <LogOut className="h-4 w-4 group-hover:text-red-500" />
                 <span>Cerrar sesion</span>
@@ -183,26 +183,26 @@ export function Layout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="safe-top sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur lg:hidden">
-          <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
+        <header className="safe-top sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 shadow-[0_12px_30px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl lg:hidden">
+          <div className="flex h-[4.125rem] items-center justify-between gap-3 px-3.5 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setSidebarOpen(true)}
-                className="rounded-xl p-2 text-slate-600 transition-colors hover:bg-slate-100"
+                className="rounded-2xl p-2.5 text-slate-600 transition-colors hover:bg-slate-100"
               >
                 <Menu className="h-5 w-5" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-900">VetManager</p>
-                <p className="text-xs text-slate-500">Operacion diaria</p>
+                <p className="truncate text-[15px] font-semibold text-slate-900">VetManager</p>
+                <p className="text-[11px] text-slate-500">Operacion diaria</p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => navigate('/alerts')}
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-orange-50 hover:text-orange-600"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100/90 text-slate-600 shadow-sm transition-colors hover:bg-orange-50 hover:text-orange-600"
             >
               <Bell className="h-4 w-4" />
               {urgentAlertsCount > 0 && (
@@ -214,14 +214,14 @@ export function Layout() {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 overflow-x-clip px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
+        <main className="min-w-0 flex-1 overflow-x-clip px-3.5 py-3 sm:px-6 lg:px-8 lg:py-8">
           <div className="page-bottom-offset mx-auto w-full max-w-7xl space-y-6 lg:space-y-8">
             <Outlet />
           </div>
         </main>
       </div>
 
-      <nav className="mobile-nav-shell fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/96 px-2 pt-2 backdrop-blur lg:hidden">
+      <nav className="mobile-nav-shell fixed bottom-[var(--mobile-dock-offset)] left-1/2 z-20 w-[min(calc(100%-1rem),32rem)] -translate-x-1/2 rounded-[30px] border border-slate-200/80 bg-white/94 px-2 pt-2 shadow-[0_22px_60px_-30px_rgba(15,23,42,0.58)] backdrop-blur-xl lg:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
           {mobileNavItems.map((item) => (
             <NavLink
@@ -229,8 +229,10 @@ export function Layout() {
               to={item.to}
               className={({ isActive }) =>
                 [
-                  'relative flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition-colors',
-                  isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900',
+                  'relative flex min-w-0 flex-col items-center gap-1 rounded-[20px] px-2 py-2.5 text-[11px] font-semibold transition-colors',
+                  isActive
+                    ? 'bg-teal-50 text-teal-700 shadow-[inset_0_0_0_1px_rgba(20,184,166,0.12)]'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900',
                 ].join(' ')
               }
             >

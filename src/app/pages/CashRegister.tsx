@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useData } from '../context/DataContext';
 import { addDays, format, isSameDay, parseISO, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -12,9 +11,17 @@ import {
   Plus,
   TrendingDown,
   TrendingUp,
-  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useData } from '../context/DataContext';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
 
 export function CashRegister() {
   const { transactions: allTransactions, patients, addTransaction } = useData();
@@ -44,6 +51,10 @@ export function CashRegister() {
     return patient ? patient.name : 'General / Varios';
   };
 
+  const resetForm = () => {
+    setNewTransaction({ amount: '', description: '', type: 'income', patient_id: '' });
+  };
+
   const handleSaveTransaction = (event: React.FormEvent) => {
     event.preventDefault();
     if (!newTransaction.amount || !newTransaction.description) return;
@@ -60,44 +71,179 @@ export function CashRegister() {
 
     toast.success('Operacion registrada correctamente');
     setShowAddModal(false);
-    setNewTransaction({ amount: '', description: '', type: 'income', patient_id: '' });
+    resetForm();
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 animate-in fade-in duration-500 sm:space-y-7">
       <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="flex items-center gap-3 text-[1.75rem] font-bold tracking-tight text-slate-900 sm:text-3xl">
             <div className="rounded-2xl bg-emerald-100 p-2.5 text-emerald-700">
               <DollarSign className="h-6 w-6" />
             </div>
             Caja diaria
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-            Controla ingresos, egresos y balance con una lectura clara y accionable desde cualquier pantalla.
+            Registra operaciones con una lectura mas clara y un flujo de captura que no se rompe en movil.
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 sm:w-auto">
+          <button className="btn-touch w-full border border-slate-300 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 sm:w-auto">
             <Download className="h-4 w-4" />
             Exportar
           </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 sm:w-auto"
+
+          <Dialog
+            open={showAddModal}
+            onOpenChange={(open) => {
+              setShowAddModal(open);
+              if (!open) resetForm();
+            }}
           >
-            <Plus className="h-4 w-4" />
-            Nueva operacion
-          </button>
+            <DialogTrigger asChild>
+              <button className="btn-touch w-full bg-indigo-600 text-white shadow-sm transition-colors hover:bg-indigo-700 sm:w-auto">
+                <Plus className="h-4 w-4" />
+                Nueva operacion
+              </button>
+            </DialogTrigger>
+
+            <DialogContent className="h-[min(92dvh,calc(100dvh-0.5rem))] gap-0 overflow-hidden p-0 sm:h-auto sm:max-w-md">
+              <div className="mobile-form-shell h-full">
+                <div className="mobile-form-header pr-14">
+                  <div className="mb-3 flex justify-center sm:hidden">
+                    <div className="h-1.5 w-12 rounded-full bg-slate-200" />
+                  </div>
+                  <DialogTitle className="text-left text-xl font-bold text-slate-900">Registrar operacion</DialogTitle>
+                  <DialogDescription className="mt-1 text-left text-sm text-slate-500">
+                    Captura ingresos o gastos sin perder el contexto del corte diario.
+                  </DialogDescription>
+                </div>
+
+                <form onSubmit={handleSaveTransaction} className="mobile-form-shell">
+                  <div className="mobile-form-body space-y-5">
+                    <section className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+                      <p className="mb-3 block text-sm font-medium text-slate-700">Tipo</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setNewTransaction({ ...newTransaction, type: 'income' })}
+                          className={[
+                            'btn-touch border transition-colors',
+                            newTransaction.type === 'income'
+                              ? 'border-green-200 bg-green-50 text-green-700'
+                              : 'border-slate-200 bg-white text-slate-600',
+                          ].join(' ')}
+                        >
+                          <Plus className="h-4 w-4" />
+                          Ingreso
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewTransaction({ ...newTransaction, type: 'expense' })}
+                          className={[
+                            'btn-touch border transition-colors',
+                            newTransaction.type === 'expense'
+                              ? 'border-red-200 bg-red-50 text-red-700'
+                              : 'border-slate-200 bg-white text-slate-600',
+                          ].join(' ')}
+                        >
+                          <Minus className="h-4 w-4" />
+                          Gasto
+                        </button>
+                      </div>
+                    </section>
+
+                    <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="cash-amount" className="mb-2 block text-sm font-medium text-slate-700">
+                            Monto
+                          </label>
+                          <div className="relative">
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">$</div>
+                            <input
+                              id="cash-amount"
+                              type="number"
+                              required
+                              min="0"
+                              inputMode="decimal"
+                              className="field-touch border border-slate-300 pl-9 pr-4 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                              placeholder="0.00"
+                              value={newTransaction.amount}
+                              onChange={(event) => setNewTransaction({ ...newTransaction, amount: event.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label htmlFor="cash-description" className="mb-2 block text-sm font-medium text-slate-700">
+                            Descripcion
+                          </label>
+                          <input
+                            id="cash-description"
+                            type="text"
+                            required
+                            className="field-touch border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                            placeholder="Ej. Consulta general"
+                            value={newTransaction.description}
+                            onChange={(event) => setNewTransaction({ ...newTransaction, description: event.target.value })}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="cash-patient" className="mb-2 block text-sm font-medium text-slate-700">
+                            Paciente (opcional)
+                          </label>
+                          <select
+                            id="cash-patient"
+                            className="field-touch border border-slate-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                            value={newTransaction.patient_id}
+                            onChange={(event) => setNewTransaction({ ...newTransaction, patient_id: event.target.value })}
+                          >
+                            <option value="">General / Ninguno</option>
+                            {patients.map((patient) => (
+                              <option key={patient.id} value={patient.id}>
+                                {patient.name} ({patient.owner_name})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div className="mobile-form-footer">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                      <DialogClose asChild>
+                        <button
+                          type="button"
+                          className="btn-touch w-full border border-slate-300 text-slate-600 transition-colors hover:bg-slate-50"
+                        >
+                          Cancelar
+                        </button>
+                      </DialogClose>
+                      <button
+                        type="submit"
+                        className="btn-touch w-full bg-indigo-600 text-white transition-colors hover:bg-indigo-700"
+                      >
+                        Guardar operacion
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:rounded-[28px] sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <button
             onClick={() => setSelectedDate((date) => addDays(date, -1))}
-            className="inline-flex items-center gap-2 self-start rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+            className="btn-touch-compact self-start border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
           >
             <ChevronLeft className="h-4 w-4" />
             Anterior
@@ -105,7 +251,7 @@ export function CashRegister() {
 
           <div className="text-center">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Corte diario</p>
-            <h2 className="mt-1 flex flex-col items-center justify-center gap-2 text-lg font-bold capitalize text-slate-800 sm:flex-row">
+            <h2 className="mt-1 flex flex-col items-center justify-center gap-2 text-base font-bold capitalize text-slate-800 sm:flex-row sm:text-lg">
               <Calendar className="h-5 w-5 text-indigo-500" />
               {format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}
             </h2>
@@ -113,7 +259,7 @@ export function CashRegister() {
 
           <button
             onClick={() => setSelectedDate((date) => addDays(date, 1))}
-            className="inline-flex items-center gap-2 self-start rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:self-auto"
+            className="btn-touch-compact self-start border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 sm:self-auto"
           >
             Siguiente
             <ChevronRight className="h-4 w-4" />
@@ -122,7 +268,7 @@ export function CashRegister() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <article className="relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white p-5 shadow-sm">
+        <article className="relative overflow-hidden rounded-[24px] border border-emerald-100 bg-white p-5 shadow-sm sm:rounded-[26px]">
           <div className="absolute right-0 top-0 p-4 opacity-10">
             <TrendingUp className="h-24 w-24 text-emerald-600" />
           </div>
@@ -130,7 +276,7 @@ export function CashRegister() {
           <p className="mt-2 text-3xl font-bold text-emerald-600">+${income.toFixed(2)}</p>
         </article>
 
-        <article className="relative overflow-hidden rounded-[26px] border border-red-100 bg-white p-5 shadow-sm">
+        <article className="relative overflow-hidden rounded-[24px] border border-red-100 bg-white p-5 shadow-sm sm:rounded-[26px]">
           <div className="absolute right-0 top-0 p-4 opacity-10">
             <TrendingDown className="h-24 w-24 text-red-600" />
           </div>
@@ -138,7 +284,7 @@ export function CashRegister() {
           <p className="mt-2 text-3xl font-bold text-red-600">-${expense.toFixed(2)}</p>
         </article>
 
-        <article className="relative overflow-hidden rounded-[26px] border border-slate-800 bg-slate-900 p-5 text-white shadow-sm">
+        <article className="relative overflow-hidden rounded-[24px] border border-slate-800 bg-slate-900 p-5 text-white shadow-sm sm:rounded-[26px]">
           <div className="absolute right-0 top-0 p-4 opacity-10">
             <DollarSign className="h-24 w-24 text-white" />
           </div>
@@ -149,7 +295,7 @@ export function CashRegister() {
         </article>
       </section>
 
-      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm sm:rounded-[28px]">
         <div className="border-b border-slate-100 p-5 sm:p-6">
           <h3 className="text-lg font-bold text-slate-800">Movimientos</h3>
         </div>
@@ -189,7 +335,7 @@ export function CashRegister() {
             </div>
 
             <div className="table-scroll hidden md:block">
-              <table className="w-full min-w-[44rem] text-left text-sm">
+              <table className="w-full text-left text-sm">
                 <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
                   <tr>
                     <th className="px-6 py-3">Hora</th>
@@ -233,115 +379,6 @@ export function CashRegister() {
           </>
         )}
       </section>
-
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
-          <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-[28px] bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-4">
-              <h3 className="text-lg font-bold text-slate-800">Registrar operacion</h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveTransaction} className="space-y-4 p-5 sm:p-6">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Tipo</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setNewTransaction({ ...newTransaction, type: 'income' })}
-                    className={[
-                      'inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors',
-                      newTransaction.type === 'income'
-                        ? 'border-green-200 bg-green-50 text-green-700'
-                        : 'border-slate-200 bg-white text-slate-600',
-                    ].join(' ')}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Ingreso
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewTransaction({ ...newTransaction, type: 'expense' })}
-                    className={[
-                      'inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors',
-                      newTransaction.type === 'expense'
-                        ? 'border-red-200 bg-red-50 text-red-700'
-                        : 'border-slate-200 bg-white text-slate-600',
-                    ].join(' ')}
-                  >
-                    <Minus className="h-4 w-4" />
-                    Gasto
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Monto</label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">$</div>
-                  <input
-                    type="number"
-                    required
-                    className="w-full rounded-2xl border border-slate-300 py-3 pl-8 pr-4 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                    placeholder="0.00"
-                    value={newTransaction.amount}
-                    onChange={(event) => setNewTransaction({ ...newTransaction, amount: event.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Descripcion</label>
-                <input
-                  type="text"
-                  required
-                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="Ej: Consulta general"
-                  value={newTransaction.description}
-                  onChange={(event) => setNewTransaction({ ...newTransaction, description: event.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Paciente (opcional)</label>
-                <select
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                  value={newTransaction.patient_id}
-                  onChange={(event) => setNewTransaction({ ...newTransaction, patient_id: event.target.value })}
-                >
-                  <option value="">General / Ninguno</option>
-                  {patients.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.name} ({patient.owner_name})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-indigo-600 px-4 py-3 font-medium text-white transition-colors hover:bg-indigo-700"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -67,7 +67,7 @@ export function Reports() {
   return (
     <div className="space-y-6 pb-4">
       <section>
-        <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="flex items-center gap-3 text-[1.75rem] font-bold tracking-tight text-slate-900 sm:text-3xl">
           <div className="rounded-2xl bg-violet-100 p-2.5 text-violet-700">
             <FileText className="h-6 w-6" />
           </div>

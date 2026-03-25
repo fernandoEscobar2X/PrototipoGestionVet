@@ -43,13 +43,13 @@ export function PatientDetail() {
         <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-slate-50">
           <User className="h-10 w-10 text-slate-300" />
         </div>
-        <h2 className="text-3xl font-bold text-slate-900">Paciente no encontrado</h2>
+        <h2 className="text-[1.85rem] font-bold text-slate-900 sm:text-3xl">Paciente no encontrado</h2>
         <p className="mt-2 max-w-md text-slate-500">
           El paciente que buscas no existe o ya no esta disponible en el sistema.
         </p>
         <Link
           to="/patients"
-          className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-teal-600 px-6 py-3 font-medium text-white shadow-lg shadow-teal-600/20 transition-all hover:bg-teal-700"
+          className="btn-touch mt-8 bg-teal-600 px-6 text-white shadow-lg shadow-teal-600/20 transition-all hover:bg-teal-700"
         >
           <ArrowLeft className="h-5 w-5" />
           Volver a pacientes
@@ -68,19 +68,19 @@ export function PatientDetail() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 sm:space-y-8">
-      <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+      <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm sm:rounded-[28px] sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-4">
             <Link
               to="/patients"
-              className="inline-flex shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-slate-500 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
+              className="btn-icon-touch shrink-0 border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
             >
               <ArrowLeft className="h-5 w-5" />
             </Link>
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">{patient.name}</h1>
+                <h1 className="text-[1.8rem] font-bold tracking-tight text-slate-900 sm:text-3xl">{patient.name}</h1>
                 <span
                   className={[
                     'inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide',
@@ -110,14 +110,14 @@ export function PatientDetail() {
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <button
               onClick={() => setShowEdit(true)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 sm:w-auto"
+              className="btn-touch w-full border border-slate-200 bg-white text-slate-700 shadow-sm transition-all hover:bg-slate-50 sm:w-auto"
             >
               <Edit className="h-4 w-4" />
               Editar
             </button>
             <button
               onClick={() => updatePatient(patient.id, { status: patient.status === 'active' ? 'archived' : 'active' })}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-100 bg-white px-4 py-3 font-medium text-orange-600 shadow-sm transition-all hover:bg-orange-50 sm:w-auto"
+              className="btn-touch w-full border border-orange-100 bg-white text-orange-600 shadow-sm transition-all hover:bg-orange-50 sm:w-auto"
             >
               {patient.status === 'active' ? 'Archivar' : 'Activar'}
             </button>
@@ -127,13 +127,13 @@ export function PatientDetail() {
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-4">
         <aside className="space-y-5 xl:col-span-1">
-          <nav className="mobile-chip-scroll rounded-[28px] border border-slate-200 bg-white p-2 shadow-sm xl:block xl:space-y-1 xl:overflow-visible xl:whitespace-normal xl:p-2.5">
+          <nav className="grid grid-cols-2 gap-2 rounded-[24px] border border-slate-200 bg-white p-2 shadow-sm sm:grid-cols-3 xl:block xl:space-y-1 xl:p-2.5">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={[
-                  'inline-flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all xl:flex xl:w-full xl:justify-start',
+                  'inline-flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all xl:flex xl:w-full xl:justify-start',
                   activeTab === tab.id
                     ? 'bg-teal-50 text-teal-700 shadow-sm ring-1 ring-teal-100'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900',
@@ -147,7 +147,7 @@ export function PatientDetail() {
                 >
                   <tab.icon className="h-4 w-4" />
                 </div>
-                <span className="whitespace-nowrap xl:whitespace-normal">{tab.label}</span>
+                <span className="whitespace-normal text-left">{tab.label}</span>
                 {activeTab === tab.id && <ChevronRight className="ml-auto hidden h-4 w-4 opacity-50 xl:block" />}
               </button>
             ))}
@@ -181,7 +181,7 @@ export function PatientDetail() {
               <p className="mt-2 text-slate-300">
                 {format(parseISO(patient.next_vaccine), "d 'de' MMMM", { locale: es })}
               </p>
-              <button className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-white/20">
+              <button className="btn-touch mt-5 w-full bg-white/10 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-white/20">
                 Ver agenda
               </button>
             </div>
@@ -236,7 +236,7 @@ function EditPatientForm({ patient, onClose }: { patient: Patient; onClose: () =
         <div>
           <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Nombre</label>
           <input
-            className="w-full rounded-2xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             value={form.name}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
             required
@@ -245,7 +245,7 @@ function EditPatientForm({ patient, onClose }: { patient: Patient; onClose: () =
         <div>
           <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Raza</label>
           <input
-            className="w-full rounded-2xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             value={form.breed}
             onChange={(event) => setForm({ ...form, breed: event.target.value })}
           />
@@ -257,7 +257,7 @@ function EditPatientForm({ patient, onClose }: { patient: Patient; onClose: () =
         <input
           type="number"
           step="0.1"
-          className="w-full rounded-2xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          className="field-touch border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           value={form.weight}
           onChange={(event) => setForm({ ...form, weight: parseFloat(event.target.value) })}
         />
@@ -268,20 +268,20 @@ function EditPatientForm({ patient, onClose }: { patient: Patient; onClose: () =
         <div className="space-y-3">
           <input
             placeholder="Nombre"
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 bg-white px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             value={form.owner_name}
             onChange={(event) => setForm({ ...form, owner_name: event.target.value })}
           />
           <input
             placeholder="Telefono"
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 bg-white px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             value={form.owner_phone}
             onChange={(event) => setForm({ ...form, owner_phone: event.target.value })}
           />
           <input
             placeholder="Email"
             type="email"
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            className="field-touch border border-slate-200 bg-white px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             value={form.owner_email}
             onChange={(event) => setForm({ ...form, owner_email: event.target.value })}
           />
@@ -292,7 +292,7 @@ function EditPatientForm({ patient, onClose }: { patient: Patient; onClose: () =
         <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Notas</label>
         <textarea
           rows={3}
-          className="w-full rounded-2xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          className="field-touch border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           value={form.notes}
           onChange={(event) => setForm({ ...form, notes: event.target.value })}
           placeholder="Alergias, condiciones especiales..."
@@ -303,13 +303,13 @@ function EditPatientForm({ patient, onClose }: { patient: Patient; onClose: () =
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+          className="btn-touch w-full border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-teal-700"
+          className="btn-touch w-full bg-teal-600 text-white transition-colors hover:bg-teal-700"
         >
           <Save className="h-4 w-4" />
           Guardar cambios
@@ -374,14 +374,14 @@ function HistoryTab({ patientId }: { patientId: string }) {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xl font-bold text-slate-900">Consultas recientes</h3>
-        <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition-colors hover:bg-teal-700 sm:w-auto">
+        <button className="btn-touch w-full bg-teal-600 text-white shadow-lg shadow-teal-600/20 transition-colors hover:bg-teal-700 sm:w-auto">
           <Plus className="h-4 w-4" />
           Nueva consulta
         </button>
       </div>
 
       {records.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-14 text-center">
+        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-10 text-center sm:p-14">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
             <Activity className="h-8 w-8 text-slate-300" />
           </div>
@@ -399,7 +399,7 @@ function HistoryTab({ patientId }: { patientId: string }) {
                   </p>
                   <h4 className="mt-2 text-lg font-bold text-slate-800">{record.diagnosis}</h4>
                 </div>
-                <button className="inline-flex w-fit items-center gap-2 rounded-2xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">
+                <button className="btn-touch-compact w-fit border border-slate-200 px-3 text-slate-600 transition-colors hover:bg-slate-50">
                   <Edit className="h-4 w-4" />
                   Editar
                 </button>
@@ -435,7 +435,7 @@ function VaccinesTab({ patientId }: { patientId: string }) {
             <h3 className="text-lg font-bold text-slate-800">Proximas vacunas</h3>
             <p className="text-sm text-slate-500">Control preventivo y seguimiento anual.</p>
           </div>
-          <button className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-bold text-orange-700 shadow-sm transition-colors hover:bg-orange-100 sm:w-auto">
+          <button className="btn-touch w-full bg-white text-orange-700 shadow-sm transition-colors hover:bg-orange-100 sm:w-auto">
             Programar
           </button>
         </div>
@@ -484,7 +484,7 @@ function VaccinesTab({ patientId }: { patientId: string }) {
         </div>
 
         <div className="table-scroll hidden overflow-hidden rounded-[24px] border border-slate-200 md:block">
-          <table className="w-full min-w-[40rem] text-left text-sm">
+          <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
                 <th className="px-6 py-4 font-semibold">Fecha</th>
@@ -520,7 +520,7 @@ function DocumentsTab({ patientId }: { patientId: string }) {
         <h3 className="text-xl font-bold text-slate-900">Documentos del paciente</h3>
         <button
           onClick={() => toast.success('Subida de archivos simulada')}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition-colors hover:bg-emerald-700 sm:w-auto"
+          className="btn-touch w-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 transition-colors hover:bg-emerald-700 sm:w-auto"
         >
           <Upload className="h-4 w-4" />
           Subir documento
@@ -528,7 +528,7 @@ function DocumentsTab({ patientId }: { patientId: string }) {
       </div>
 
       {patientDocuments.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-14 text-center">
+        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-10 text-center sm:p-14">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
             <File className="h-8 w-8 text-slate-300" />
           </div>
@@ -573,7 +573,7 @@ function DocumentsTab({ patientId }: { patientId: string }) {
 
               {document.description && <p className="mt-4 text-sm leading-6 text-slate-600">{document.description}</p>}
 
-              <button className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100">
+              <button className="btn-touch mt-4 w-full bg-slate-50 text-slate-700 transition-colors hover:bg-slate-100">
                 <Download className="h-4 w-4" />
                 Descargar
               </button>
@@ -593,14 +593,14 @@ function BillingTab({ patientId }: { patientId: string }) {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xl font-bold text-slate-900">Historial de pagos</h3>
-        <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition-colors hover:bg-emerald-700 sm:w-auto">
+        <button className="btn-touch w-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 transition-colors hover:bg-emerald-700 sm:w-auto">
           <DollarSign className="h-4 w-4" />
           Registrar cobro
         </button>
       </div>
 
       {patientTransactions.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-14 text-center text-slate-400">
+        <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-slate-400 sm:p-14">
           No hay transacciones registradas.
         </div>
       ) : (
@@ -632,7 +632,7 @@ function BillingTab({ patientId }: { patientId: string }) {
           </div>
 
           <div className="table-scroll hidden overflow-hidden rounded-[24px] border border-slate-200 md:block">
-            <table className="w-full min-w-[40rem] text-left text-sm">
+            <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-100 bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
                   <th className="px-6 py-4 font-semibold">Fecha</th>

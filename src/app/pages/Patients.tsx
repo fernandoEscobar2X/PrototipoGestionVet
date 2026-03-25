@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { AlertCircle, Bird, Cat, ChevronRight, Dog, Plus, Search, User, X } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { AlertCircle, Bird, Cat, ChevronRight, Dog, Plus, Search, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import * as Dialog from '@radix-ui/react-dialog';
+import { useData } from '../context/DataContext';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
 
 export function Patients() {
   const { patients, addPatient } = useData();
@@ -20,6 +27,14 @@ export function Patients() {
     weight: 0,
     birth_date: '',
   });
+
+  const speciesFilters = [
+    { value: 'all', label: 'Todos' },
+    { value: 'Dog', label: 'Perros' },
+    { value: 'Cat', label: 'Gatos' },
+    { value: 'Bird', label: 'Aves' },
+    { value: 'Other', label: 'Otros' },
+  ] as const;
 
   const filteredPatients = patients.filter((patient) => {
     const matchesSearch =
@@ -42,6 +57,18 @@ export function Patients() {
     }
   };
 
+  const resetForm = () => {
+    setNewPatient({
+      name: '',
+      species: 'Dog',
+      breed: '',
+      owner_name: '',
+      owner_phone: '',
+      weight: 0,
+      birth_date: '',
+    });
+  };
+
   const handleCreatePatient = (event: React.FormEvent) => {
     event.preventDefault();
     if (!user) return;
@@ -56,200 +83,226 @@ export function Patients() {
     });
 
     setIsModalOpen(false);
-    setNewPatient({
-      name: '',
-      species: 'Dog',
-      breed: '',
-      owner_name: '',
-      owner_phone: '',
-      weight: 0,
-      birth_date: '',
-    });
+    resetForm();
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 sm:space-y-8">
+    <div className="space-y-5 animate-in fade-in duration-500 sm:space-y-7">
       <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="flex items-center gap-3 text-[1.75rem] font-bold tracking-tight text-slate-900 sm:text-3xl">
             <div className="rounded-2xl bg-teal-100 p-2.5 text-teal-700">
               <User className="h-6 w-6" />
             </div>
             Pacientes
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-            Gestiona el expediente clinico y los datos del tutor con una vista limpia, filtrable y optimizada para
-            consulta rapida desde el telefono.
+            Consulta expedientes y da de alta nuevas mascotas con un flujo mas claro y estable en telefono.
           </p>
         </div>
 
-        <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <Dialog.Trigger asChild>
-            <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-600 px-5 py-3 font-semibold text-white shadow-lg shadow-teal-600/20 transition-all hover:bg-teal-700 sm:w-auto">
+        <Dialog
+          open={isModalOpen}
+          onOpenChange={(open) => {
+            setIsModalOpen(open);
+            if (!open) resetForm();
+          }}
+        >
+          <DialogTrigger asChild>
+            <button className="btn-touch w-full bg-teal-600 text-white shadow-lg shadow-teal-600/20 transition-all hover:bg-teal-700 sm:w-auto">
               <Plus className="h-5 w-5" />
               Nuevo paciente
             </button>
-          </Dialog.Trigger>
-          <Dialog.Portal>
-            <Dialog.Overlay className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm animate-in fade-in duration-200" />
-            <Dialog.Content className="fixed inset-x-3 bottom-3 top-auto z-50 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl outline-none animate-in slide-in-from-bottom-4 duration-200 sm:inset-x-[50%] sm:top-[50%] sm:bottom-auto sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7">
-              <div className="mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <Dialog.Title className="text-xl font-bold text-slate-900">Registrar nuevo paciente</Dialog.Title>
-                  <Dialog.Description className="mt-1 text-sm text-slate-500">
-                    Captura solo la informacion esencial para no frenar la operacion en recepcion.
-                  </Dialog.Description>
+          </DialogTrigger>
+
+          <DialogContent className="h-[min(92dvh,calc(100dvh-0.5rem))] gap-0 overflow-hidden p-0 sm:h-auto sm:max-w-2xl">
+            <div className="mobile-form-shell h-full">
+              <div className="mobile-form-header pr-14">
+                <div className="mb-3 flex justify-center sm:hidden">
+                  <div className="h-1.5 w-12 rounded-full bg-slate-200" />
                 </div>
-                <Dialog.Close className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700">
-                  <X className="h-5 w-5" />
-                </Dialog.Close>
+                <DialogTitle className="text-left text-xl font-bold text-slate-900">Registrar nuevo paciente</DialogTitle>
+                <DialogDescription className="mt-1 text-left text-sm text-slate-500">
+                  Guarda primero los datos esenciales y completa el resto despues, sin recortes ni scroll confuso.
+                </DialogDescription>
               </div>
 
-              <form onSubmit={handleCreatePatient} className="space-y-5">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Nombre de la mascota</label>
-                    <input
-                      required
-                      className="w-full rounded-xl border border-slate-300 px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                      value={newPatient.name}
-                      onChange={(event) => setNewPatient({ ...newPatient, name: event.target.value })}
-                      placeholder="Ej. Max"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Especie</label>
-                    <select
-                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                      value={newPatient.species}
-                      onChange={(event) => setNewPatient({ ...newPatient, species: event.target.value })}
-                    >
-                      <option value="Dog">Perro</option>
-                      <option value="Cat">Gato</option>
-                      <option value="Bird">Ave</option>
-                      <option value="Other">Otro</option>
-                    </select>
-                  </div>
-                </div>
+              <form onSubmit={handleCreatePatient} className="mobile-form-shell">
+                <div className="mobile-form-body space-y-5">
+                  <section className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">Paciente</h2>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Raza</label>
-                    <input
-                      required
-                      className="w-full rounded-xl border border-slate-300 px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                      value={newPatient.breed}
-                      onChange={(event) => setNewPatient({ ...newPatient, breed: event.target.value })}
-                      placeholder="Ej. Golden Retriever"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Peso (kg)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      required
-                      className="w-full rounded-xl border border-slate-300 px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                      value={newPatient.weight || ''}
-                      onChange={(event) => setNewPatient({ ...newPatient, weight: parseFloat(event.target.value) })}
-                      placeholder="0.0"
-                    />
-                  </div>
-                </div>
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label htmlFor="patient-name" className="text-sm font-medium text-slate-700">
+                          Nombre de la mascota
+                        </label>
+                        <input
+                          id="patient-name"
+                          required
+                          className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                          value={newPatient.name}
+                          onChange={(event) => setNewPatient({ ...newPatient, name: event.target.value })}
+                          placeholder="Ej. Max"
+                        />
+                      </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Fecha de nacimiento</label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full rounded-xl border border-slate-300 px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                    value={newPatient.birth_date}
-                    onChange={(event) => setNewPatient({ ...newPatient, birth_date: event.target.value })}
-                  />
-                </div>
+                      <div className="space-y-2">
+                        <label htmlFor="patient-species" className="text-sm font-medium text-slate-700">
+                          Especie
+                        </label>
+                        <select
+                          id="patient-species"
+                          className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                          value={newPatient.species}
+                          onChange={(event) => setNewPatient({ ...newPatient, species: event.target.value })}
+                        >
+                          <option value="Dog">Perro</option>
+                          <option value="Cat">Gato</option>
+                          <option value="Bird">Ave</option>
+                          <option value="Other">Otro</option>
+                        </select>
+                      </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
-                  <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">Tutor o propietario</h2>
-                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Nombre</label>
+                      <div className="space-y-2">
+                        <label htmlFor="patient-breed" className="text-sm font-medium text-slate-700">
+                          Raza
+                        </label>
+                        <input
+                          id="patient-breed"
+                          required
+                          className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                          value={newPatient.breed}
+                          onChange={(event) => setNewPatient({ ...newPatient, breed: event.target.value })}
+                          placeholder="Ej. Golden Retriever"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="patient-weight" className="text-sm font-medium text-slate-700">
+                          Peso (kg)
+                        </label>
+                        <input
+                          id="patient-weight"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          inputMode="decimal"
+                          required
+                          className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                          value={newPatient.weight || ''}
+                          onChange={(event) =>
+                            setNewPatient({
+                              ...newPatient,
+                              weight: event.target.value === '' ? 0 : parseFloat(event.target.value),
+                            })
+                          }
+                          placeholder="0.0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      <label htmlFor="patient-birth-date" className="text-sm font-medium text-slate-700">
+                        Fecha de nacimiento
+                      </label>
                       <input
+                        id="patient-birth-date"
+                        type="date"
                         required
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                        value={newPatient.owner_name}
-                        onChange={(event) => setNewPatient({ ...newPatient, owner_name: event.target.value })}
-                        placeholder="Nombre completo"
+                        className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                        value={newPatient.birth_date}
+                        onChange={(event) => setNewPatient({ ...newPatient, birth_date: event.target.value })}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Telefono</label>
-                      <input
-                        required
-                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 transition-all outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                        value={newPatient.owner_phone}
-                        onChange={(event) => setNewPatient({ ...newPatient, owner_phone: event.target.value })}
-                        placeholder="555-0000"
-                      />
+                  </section>
+
+                  <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                    <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">Tutor o propietario</h2>
+
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label htmlFor="patient-owner-name" className="text-sm font-medium text-slate-700">
+                          Nombre
+                        </label>
+                        <input
+                          id="patient-owner-name"
+                          required
+                          className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                          value={newPatient.owner_name}
+                          onChange={(event) => setNewPatient({ ...newPatient, owner_name: event.target.value })}
+                          placeholder="Nombre completo"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="patient-owner-phone" className="text-sm font-medium text-slate-700">
+                          Telefono
+                        </label>
+                        <input
+                          id="patient-owner-phone"
+                          required
+                          inputMode="tel"
+                          className="field-touch border border-slate-300 bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                          value={newPatient.owner_phone}
+                          onChange={(event) => setNewPatient({ ...newPatient, owner_phone: event.target.value })}
+                          placeholder="555-0000"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  </section>
                 </div>
 
-                <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
-                  <Dialog.Close asChild>
+                <div className="mobile-form-footer">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <DialogClose asChild>
+                      <button
+                        type="button"
+                        className="btn-touch w-full border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 sm:w-auto"
+                      >
+                        Cancelar
+                      </button>
+                    </DialogClose>
                     <button
-                      type="button"
-                      className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-100 sm:w-auto"
+                      type="submit"
+                      className="btn-touch w-full bg-teal-600 text-white shadow-lg shadow-teal-600/20 transition-colors hover:bg-teal-700 sm:w-auto"
                     >
-                      Cancelar
+                      Guardar paciente
                     </button>
-                  </Dialog.Close>
-                  <button
-                    type="submit"
-                    className="inline-flex w-full items-center justify-center rounded-xl bg-teal-600 px-5 py-3 font-bold text-white shadow-lg shadow-teal-600/20 transition-colors hover:bg-teal-700 sm:w-auto"
-                  >
-                    Guardar paciente
-                  </button>
+                  </div>
                 </div>
               </form>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:rounded-[28px] sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           <div className="group relative w-full flex-1">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-teal-500" />
             <input
               type="text"
               placeholder="Buscar por mascota o tutor..."
-              className="w-full rounded-2xl border border-slate-200 py-3 pl-10 pr-4 text-slate-700 transition-all outline-none placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+              className="field-touch border border-slate-200 pl-10 pr-4 text-slate-700 placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
 
-          <div className="mobile-chip-scroll w-full lg:w-auto lg:max-w-[48rem]">
-            {['all', 'Dog', 'Cat', 'Bird', 'Other'].map((type) => (
+          <div className="flex flex-wrap gap-2 lg:max-w-[48rem]">
+            {speciesFilters.map((type) => (
               <button
-                key={type}
-                onClick={() => setFilterSpecies(type as 'all' | 'Dog' | 'Cat' | 'Bird' | 'Other')}
+                key={type.value}
+                onClick={() => setFilterSpecies(type.value)}
                 className={[
                   'rounded-2xl border px-4 py-2 text-sm font-semibold transition-all',
-                  filterSpecies === type
+                  filterSpecies === type.value
                     ? 'border-teal-200 bg-teal-50 text-teal-700 shadow-sm'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
                 ].join(' ')}
               >
-                {type === 'all'
-                  ? 'Todos'
-                  : type === 'Dog'
-                    ? 'Perros'
-                    : type === 'Cat'
-                      ? 'Gatos'
-                      : type === 'Bird'
-                        ? 'Aves'
-                        : 'Otros'}
+                {type.label}
               </button>
             ))}
           </div>
@@ -264,7 +317,7 @@ export function Patients() {
             <Link
               to={`/patients/${patient.id}`}
               key={patient.id}
-              className="group relative overflow-hidden rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-xl sm:p-6"
+              className="group relative overflow-hidden rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-xl sm:rounded-[26px] sm:p-6"
             >
               <div className="absolute right-5 top-5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
                 <ChevronRight className="text-teal-400" />
@@ -308,7 +361,7 @@ export function Patients() {
       </section>
 
       {filteredPatients.length === 0 && (
-        <section className="rounded-[28px] border border-dashed border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+        <section className="rounded-[24px] border border-dashed border-slate-200 bg-white px-6 py-12 text-center shadow-sm sm:rounded-[28px] sm:py-14">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50">
             <Search className="h-8 w-8 text-slate-300" />
           </div>

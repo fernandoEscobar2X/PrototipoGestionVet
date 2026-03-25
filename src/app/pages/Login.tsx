@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import { ArrowRight, Lock, Mail, PawPrint, Stethoscope } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export function Login() {
   const { login } = useAuth();
@@ -50,22 +50,28 @@ export function Login() {
                 </div>
                 <span className="text-xl font-bold tracking-tight text-slate-900">VetManager Pro</span>
               </div>
-              <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">Bienvenido de nuevo</h1>
+              <h1 className="mt-6 text-[2.4rem] font-extrabold tracking-tight text-slate-900 sm:text-5xl">Bienvenido de nuevo</h1>
               <p className="mt-3 text-base leading-7 text-slate-500 sm:text-lg">
                 Accede a tu panel clinico y mantente al dia con la operacion de la veterinaria.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5 rounded-[32px] border border-white/70 bg-white/90 p-5 shadow-xl shadow-slate-200/70 backdrop-blur sm:p-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5 rounded-[32px] border border-white/70 bg-white/90 p-5 shadow-xl shadow-slate-200/70 backdrop-blur sm:p-6"
+            >
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Correo profesional</label>
+                <label htmlFor="login-email" className="mb-2 block text-sm font-semibold text-slate-700">
+                  Correo profesional
+                </label>
                 <div className="group relative">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-teal-600">
                     <Mail className="h-5 w-5" />
                   </div>
                   <input
+                    id="login-email"
                     type="email"
-                    className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 font-medium text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="field-touch block border border-slate-200 bg-slate-50 pl-11 pr-4 font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                     placeholder="nombre@clinica.com"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -75,15 +81,18 @@ export function Login() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">Contrasena</label>
+                <label htmlFor="login-password" className="mb-2 block text-sm font-semibold text-slate-700">
+                  Contrasena
+                </label>
                 <div className="group relative">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-teal-600">
                     <Lock className="h-5 w-5" />
                   </div>
                   <input
+                    id="login-password"
                     type="password"
-                    className="block w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 font-medium text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                    placeholder="••••••••"
+                    className="field-touch block border border-slate-200 bg-slate-50 pl-11 pr-4 font-medium text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    placeholder="********"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     required
@@ -102,7 +111,7 @@ export function Login() {
                 type="submit"
                 disabled={loading}
                 className={[
-                  'inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 font-bold text-white shadow-lg shadow-slate-900/10 transition-all active:scale-[0.99] hover:bg-slate-800',
+                  'btn-touch w-full bg-slate-900 text-white shadow-lg shadow-slate-900/10 transition-all active:scale-[0.99] hover:bg-slate-800',
                   loading ? 'cursor-wait opacity-80' : '',
                 ].join(' ')}
               >
@@ -128,7 +137,7 @@ export function Login() {
                     setEmail('vet@example.com');
                     setPassword('admin');
                   }}
-                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-teal-200 bg-white px-4 py-3 text-sm font-semibold text-teal-700 transition-all hover:bg-teal-50"
+                  className="btn-touch mt-3 w-full border border-teal-200 bg-white text-teal-700 transition-all hover:bg-teal-50"
                 >
                   <Stethoscope className="h-4 w-4" />
                   Usar credenciales demo

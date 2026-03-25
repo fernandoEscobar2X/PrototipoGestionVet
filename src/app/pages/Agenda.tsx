@@ -67,7 +67,7 @@ export function Agenda() {
     <div className="space-y-6 animate-in fade-in duration-500 sm:space-y-8">
       <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="flex items-center gap-3 text-[1.75rem] font-bold tracking-tight text-slate-900 sm:text-3xl">
             <div className="rounded-2xl bg-indigo-100 p-2.5 text-indigo-700">
               <Calendar className="h-6 w-6" />
             </div>
@@ -102,7 +102,7 @@ export function Agenda() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:rounded-[28px] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center justify-between gap-3 sm:justify-start">
             <button
@@ -129,14 +129,13 @@ export function Agenda() {
 
           <button
             onClick={() => setSelectedDate(startOfToday())}
-            className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-50 px-4 py-2.5 text-sm font-bold text-indigo-700 transition-colors hover:bg-indigo-100 sm:w-auto"
+            className="btn-touch-compact w-full bg-indigo-50 text-indigo-700 transition-colors hover:bg-indigo-100 sm:w-auto"
           >
             Volver a hoy
           </button>
         </div>
 
-        <div className="table-scroll -mx-1 mt-6 px-1">
-          <div className="grid min-w-[42rem] grid-cols-7 gap-3">
+        <div className="mt-5 grid grid-cols-4 gap-2 sm:mt-6 sm:grid-cols-7 sm:gap-3">
             {weekDays.map((date) => {
               const isSelected = isSameDay(date, selectedDate);
               const isTodayDate = isSameDay(date, startOfToday());
@@ -147,7 +146,7 @@ export function Agenda() {
                   key={date.toISOString()}
                   onClick={() => setSelectedDate(date)}
                   className={[
-                    'relative flex flex-col items-center rounded-2xl border px-3 py-4 transition-all',
+                    'relative flex flex-col items-center rounded-2xl border px-2.5 py-3 transition-all sm:px-3 sm:py-4',
                     isSelected
                       ? 'border-indigo-500 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
                       : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900',
@@ -157,7 +156,7 @@ export function Agenda() {
                   <span className="text-xs font-bold uppercase tracking-[0.22em] opacity-80">
                     {format(date, 'EEE', { locale: es })}
                   </span>
-                  <span className="mt-2 text-2xl font-bold">{format(date, 'd')}</span>
+                  <span className="mt-2 text-xl font-bold sm:text-2xl">{format(date, 'd')}</span>
                   <span className="mt-1 text-xs opacity-75">{format(date, 'MMM', { locale: es })}</span>
                   {hasEvents && (
                     <div className={`mt-3 flex gap-1 ${isSelected ? 'opacity-100' : 'opacity-60'}`}>
@@ -167,7 +166,6 @@ export function Agenda() {
                 </button>
               );
             })}
-          </div>
         </div>
       </section>
 
@@ -180,7 +178,7 @@ export function Agenda() {
             </h3>
             <button
               onClick={() => setShowNewAppointment(true)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/10 transition-all hover:bg-slate-800 sm:w-auto"
+              className="btn-touch w-full bg-slate-900 text-white shadow-lg shadow-slate-900/10 transition-all hover:bg-slate-800 sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               Nueva cita
@@ -188,7 +186,7 @@ export function Agenda() {
           </div>
 
           {appointmentsForDate.length === 0 ? (
-            <div className="rounded-[28px] border border-dashed border-slate-200 bg-white p-10 text-center shadow-sm">
+            <div className="rounded-[24px] border border-dashed border-slate-200 bg-white p-8 text-center shadow-sm sm:rounded-[28px] sm:p-10">
               <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50">
                 <Calendar className="h-10 w-10 text-slate-300" />
               </div>
@@ -269,7 +267,7 @@ export function Agenda() {
                         <button
                           onClick={() => handleStatusChange(appointment.id, 'completed')}
                           title="Completar"
-                          className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 lg:w-12 lg:flex-none lg:px-0"
+                          className="btn-touch flex-1 bg-emerald-50 text-emerald-700 transition-colors hover:bg-emerald-100 lg:w-12 lg:flex-none lg:px-0"
                         >
                           <CheckCircle className="h-5 w-5" />
                           <span className="lg:hidden">Completar</span>
@@ -277,7 +275,7 @@ export function Agenda() {
                         <button
                           onClick={() => handleStatusChange(appointment.id, 'cancelled')}
                           title="Cancelar"
-                          className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 lg:w-12 lg:flex-none lg:px-0"
+                          className="btn-touch flex-1 bg-red-50 text-red-700 transition-colors hover:bg-red-100 lg:w-12 lg:flex-none lg:px-0"
                         >
                           <XCircle className="h-5 w-5" />
                           <span className="lg:hidden">Cancelar</span>
@@ -292,7 +290,7 @@ export function Agenda() {
         </div>
 
         <aside className="space-y-6">
-          <div className="relative overflow-hidden rounded-[28px] bg-slate-900 p-6 text-white shadow-lg">
+          <div className="relative overflow-hidden rounded-[24px] bg-slate-900 p-5 text-white shadow-lg sm:rounded-[28px] sm:p-6">
             <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-indigo-500/25 blur-3xl" />
             <div className="relative z-10">
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
@@ -301,7 +299,7 @@ export function Agenda() {
               </h3>
 
               <div className="space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-3.5 backdrop-blur-sm sm:p-4">
                   <div className="mb-2 flex items-start justify-between gap-3">
                     <span className="rounded bg-orange-500/20 px-2 py-1 text-xs font-bold text-orange-300">
                       Alta prioridad
@@ -312,7 +310,7 @@ export function Agenda() {
                   <p className="mt-1 text-sm text-slate-300">Confirmar cirugia de Max para el viernes.</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-3.5 backdrop-blur-sm sm:p-4">
                   <div className="mb-2 flex items-start justify-between gap-3">
                     <span className="rounded bg-blue-500/20 px-2 py-1 text-xs font-bold text-blue-300">Inventario</span>
                     <span className="text-xs text-slate-400">2:00 PM</span>
@@ -322,7 +320,7 @@ export function Agenda() {
                 </div>
               </div>
 
-              <button className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-900 transition-colors hover:bg-slate-100">
+              <button className="btn-touch mt-6 w-full bg-white text-slate-900 transition-colors hover:bg-slate-100">
                 <Plus className="h-4 w-4" />
                 Agregar tarea
               </button>
@@ -340,7 +338,7 @@ export function Agenda() {
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Paciente *</label>
               <select
-                className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                className="field-touch rounded-xl border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                 value={newAppointment.patient_id}
                 onChange={(event) => setNewAppointment({ ...newAppointment, patient_id: event.target.value })}
                 required
@@ -359,7 +357,7 @@ export function Agenda() {
                 <label className="mb-1 block text-sm font-medium text-slate-700">Hora</label>
                 <input
                   type="time"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                  className="field-touch rounded-xl border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                   value={newAppointment.time}
                   onChange={(event) => setNewAppointment({ ...newAppointment, time: event.target.value })}
                 />
@@ -367,7 +365,7 @@ export function Agenda() {
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">Tipo</label>
                 <select
-                  className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                  className="field-touch rounded-xl border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                   value={newAppointment.type}
                   onChange={(event) =>
                     setNewAppointment({
@@ -387,7 +385,7 @@ export function Agenda() {
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Notas</label>
               <textarea
-                className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                className="field-touch rounded-xl border border-slate-200 px-3 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                 rows={3}
                 placeholder="Motivo de la consulta..."
                 value={newAppointment.notes}
@@ -399,13 +397,13 @@ export function Agenda() {
               <button
                 type="button"
                 onClick={() => setShowNewAppointment(false)}
-                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto"
+                className="btn-touch w-full rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-teal-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-teal-700 sm:w-auto"
+                className="btn-touch w-full rounded-xl bg-teal-600 text-white transition-colors hover:bg-teal-700 sm:w-auto"
               >
                 Agendar cita
               </button>
