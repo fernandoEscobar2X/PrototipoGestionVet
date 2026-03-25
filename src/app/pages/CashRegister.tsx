@@ -1,295 +1,339 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { format, parseISO, isSameDay, startOfToday, subDays, addDays } from 'date-fns';
+import { addDays, format, isSameDay, parseISO, startOfToday } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  Plus, 
-  Minus, 
+import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  DollarSign,
   Download,
-  X
+  Minus,
+  Plus,
+  TrendingDown,
+  TrendingUp,
+  X,
 } from 'lucide-react';
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 export function CashRegister() {
   const { transactions: allTransactions, patients, addTransaction } = useData();
   const [selectedDate, setSelectedDate] = useState(startOfToday());
   const [showAddModal, setShowAddModal] = useState(false);
-  
-  // Mock adding transaction state
-  const [newTx, setNewTx] = useState({
+  const [newTransaction, setNewTransaction] = useState({
     amount: '',
     description: '',
     type: 'income' as 'income' | 'expense',
-    patient_id: ''
+    patient_id: '',
   });
 
-  const transactions = allTransactions.filter(t =>
-    isSameDay(parseISO(t.date), selectedDate)
-  );
+  const transactions = allTransactions.filter((transaction) => isSameDay(parseISO(transaction.date), selectedDate));
 
   const income = transactions
-    .filter(t => t.type === 'income')
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .filter((transaction) => transaction.type === 'income')
+    .reduce((acc, current) => acc + current.amount, 0);
 
   const expense = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .filter((transaction) => transaction.type === 'expense')
+    .reduce((acc, current) => acc + current.amount, 0);
 
   const balance = income - expense;
 
   const getPatientName = (id: string) => {
-    const patient = patients.find(p => p.id === id);
+    const patient = patients.find((currentPatient) => currentPatient.id === id);
     return patient ? patient.name : 'General / Varios';
   };
 
-  const handleSaveTransaction = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTx.amount || !newTx.description) return;
+  const handleSaveTransaction = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!newTransaction.amount || !newTransaction.description) return;
+
     addTransaction({
       owner_user_id: 'user_001',
-      patient_id: newTx.patient_id || 'null',
+      patient_id: newTransaction.patient_id || 'null',
       date: selectedDate.toISOString(),
-      description: newTx.description,
-      amount: parseFloat(newTx.amount),
-      type: newTx.type,
+      description: newTransaction.description,
+      amount: parseFloat(newTransaction.amount),
+      type: newTransaction.type,
       status: 'paid',
     });
-    toast.success('Operación registrada correctamente');
+
+    toast.success('Operacion registrada correctamente');
     setShowAddModal(false);
-    setNewTx({ amount: '', description: '', type: 'income', patient_id: '' });
+    setNewTransaction({ amount: '', description: '', type: 'income', patient_id: '' });
   };
 
   return (
-    <div className="space-y-6 relative">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <DollarSign className="w-6 h-6 text-green-600" />
-            Caja Diaria
+          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight text-slate-900">
+            <div className="rounded-2xl bg-emerald-100 p-2.5 text-emerald-700">
+              <DollarSign className="h-6 w-6" />
+            </div>
+            Caja diaria
           </h1>
-          <p className="text-slate-500">Control de ingresos y egresos</p>
-        </div>
-        <div className="flex gap-2">
-           <button className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar</span>
-          </button>
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva Operación
-          </button>
-        </div>
-      </div>
-
-      {/* Date Selector */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-         <button 
-          onClick={() => setSelectedDate(d => addDays(d, -1))}
-          className="p-2 hover:bg-slate-100 rounded-full text-slate-500"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        
-        <div className="text-center">
-          <h2 className="text-lg font-bold text-slate-800 capitalize flex items-center justify-center gap-2">
-            <Calendar className="w-5 h-5 text-indigo-500" />
-            {format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}
-          </h2>
-        </div>
-
-        <button 
-          onClick={() => setSelectedDate(d => addDays(d, 1))}
-          className="p-2 hover:bg-slate-100 rounded-full text-slate-500"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-green-100 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <TrendingUp className="w-24 h-24 text-green-600" />
-          </div>
-          <p className="text-sm font-medium text-slate-500 mb-1">Ingresos</p>
-          <p className="text-3xl font-bold text-green-600">+${income.toFixed(2)}</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl border border-red-100 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <TrendingDown className="w-24 h-24 text-red-600" />
-          </div>
-          <p className="text-sm font-medium text-slate-500 mb-1">Gastos</p>
-          <p className="text-3xl font-bold text-red-600">-${expense.toFixed(2)}</p>
-        </div>
-
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm relative overflow-hidden text-white">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <DollarSign className="w-24 h-24 text-white" />
-          </div>
-          <p className="text-sm font-medium text-slate-400 mb-1">Balance del Día</p>
-          <p className={`text-3xl font-bold ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {balance >= 0 ? '+' : ''}${balance.toFixed(2)}
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
+            Controla ingresos, egresos y balance con una lectura clara y accionable desde cualquier pantalla.
           </p>
         </div>
-      </div>
 
-      {/* Transactions Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100">
-          <h3 className="font-bold text-lg text-slate-800">Movimientos</h3>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 sm:w-auto">
+            <Download className="h-4 w-4" />
+            Exportar
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva operacion
+          </button>
         </div>
-        
+      </section>
+
+      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            onClick={() => setSelectedDate((date) => addDays(date, -1))}
+            className="inline-flex items-center gap-2 self-start rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Anterior
+          </button>
+
+          <div className="text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Corte diario</p>
+            <h2 className="mt-1 flex flex-col items-center justify-center gap-2 text-lg font-bold capitalize text-slate-800 sm:flex-row">
+              <Calendar className="h-5 w-5 text-indigo-500" />
+              {format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}
+            </h2>
+          </div>
+
+          <button
+            onClick={() => setSelectedDate((date) => addDays(date, 1))}
+            className="inline-flex items-center gap-2 self-start rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:self-auto"
+          >
+            Siguiente
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <article className="relative overflow-hidden rounded-[26px] border border-emerald-100 bg-white p-5 shadow-sm">
+          <div className="absolute right-0 top-0 p-4 opacity-10">
+            <TrendingUp className="h-24 w-24 text-emerald-600" />
+          </div>
+          <p className="text-sm font-medium text-slate-500">Ingresos</p>
+          <p className="mt-2 text-3xl font-bold text-emerald-600">+${income.toFixed(2)}</p>
+        </article>
+
+        <article className="relative overflow-hidden rounded-[26px] border border-red-100 bg-white p-5 shadow-sm">
+          <div className="absolute right-0 top-0 p-4 opacity-10">
+            <TrendingDown className="h-24 w-24 text-red-600" />
+          </div>
+          <p className="text-sm font-medium text-slate-500">Gastos</p>
+          <p className="mt-2 text-3xl font-bold text-red-600">-${expense.toFixed(2)}</p>
+        </article>
+
+        <article className="relative overflow-hidden rounded-[26px] border border-slate-800 bg-slate-900 p-5 text-white shadow-sm">
+          <div className="absolute right-0 top-0 p-4 opacity-10">
+            <DollarSign className="h-24 w-24 text-white" />
+          </div>
+          <p className="text-sm font-medium text-slate-400">Balance del dia</p>
+          <p className={`mt-2 text-3xl font-bold ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {balance >= 0 ? '+' : ''}${balance.toFixed(2)}
+          </p>
+        </article>
+      </section>
+
+      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-100 p-5 sm:p-6">
+          <h3 className="text-lg font-bold text-slate-800">Movimientos</h3>
+        </div>
+
         {transactions.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
-            <p>No hay movimientos registrados para este día.</p>
+            <p>No hay movimientos registrados para este dia.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-3">Hora</th>
-                  <th className="px-6 py-3">Concepto</th>
-                  <th className="px-6 py-3">Paciente / Ref</th>
-                  <th className="px-6 py-3 text-right">Monto</th>
-                  <th className="px-6 py-3 text-center">Estado</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {transactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-slate-600">
-                      {format(parseISO(tx.date), 'HH:mm')}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-slate-800">
-                      {tx.description}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {getPatientName(tx.patient_id)}
-                    </td>
-                    <td className={`px-6 py-4 text-right font-bold ${
-                      tx.type === 'income' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {tx.type === 'income' ? '+' : '-'}${tx.amount}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        tx.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {tx.status === 'paid' ? 'Pagado' : 'Pendiente'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+          <>
+            <div className="divide-y divide-slate-100 md:hidden">
+              {transactions.map((transaction) => (
+                <article key={transaction.id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-slate-900">{transaction.description}</p>
+                      <p className="mt-1 text-sm text-slate-500">{getPatientName(transaction.patient_id)}</p>
+                    </div>
+                    <span
+                      className={[
+                        'rounded-full px-2.5 py-1 text-xs font-bold',
+                        transaction.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700',
+                      ].join(' ')}
+                    >
+                      {transaction.status === 'paid' ? 'Pagado' : 'Pendiente'}
+                    </span>
+                  </div>
 
-      {/* Modal Nueva Operación */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-mono text-slate-500">{format(parseISO(transaction.date), 'HH:mm')}</span>
+                    <span className={transaction.type === 'income' ? 'font-bold text-green-600' : 'font-bold text-red-600'}>
+                      {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="table-scroll hidden md:block">
+              <table className="w-full min-w-[44rem] text-left text-sm">
+                <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+                  <tr>
+                    <th className="px-6 py-3">Hora</th>
+                    <th className="px-6 py-3">Concepto</th>
+                    <th className="px-6 py-3">Paciente / Ref</th>
+                    <th className="px-6 py-3 text-right">Monto</th>
+                    <th className="px-6 py-3 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {transactions.map((transaction) => (
+                    <tr key={transaction.id} className="transition-colors hover:bg-slate-50">
+                      <td className="px-6 py-4 font-mono text-slate-600">{format(parseISO(transaction.date), 'HH:mm')}</td>
+                      <td className="px-6 py-4 font-medium text-slate-800">{transaction.description}</td>
+                      <td className="px-6 py-4 text-slate-600">{getPatientName(transaction.patient_id)}</td>
+                      <td
+                        className={[
+                          'px-6 py-4 text-right font-bold',
+                          transaction.type === 'income' ? 'text-green-600' : 'text-red-600',
+                        ].join(' ')}
+                      >
+                        {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span
+                          className={[
+                            'rounded-full px-2.5 py-1 text-xs font-bold',
+                            transaction.status === 'paid'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-yellow-100 text-yellow-700',
+                          ].join(' ')}
+                        >
+                          {transaction.status === 'paid' ? 'Pagado' : 'Pendiente'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </section>
+
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="font-bold text-lg text-slate-800">Registrar Operación</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-end bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
+          <div className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-[28px] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-4">
+              <h3 className="text-lg font-bold text-slate-800">Registrar operacion</h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={handleSaveTransaction} className="p-6 space-y-4">
+
+            <form onSubmit={handleSaveTransaction} className="space-y-4 p-5 sm:p-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
-                <div className="flex gap-2">
+                <label className="mb-2 block text-sm font-medium text-slate-700">Tipo</label>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setNewTx({ ...newTx, type: 'income' })}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium border ${
-                      newTx.type === 'income' 
-                        ? 'bg-green-50 border-green-200 text-green-700' 
-                        : 'bg-white border-slate-200 text-slate-600'
-                    }`}
+                    onClick={() => setNewTransaction({ ...newTransaction, type: 'income' })}
+                    className={[
+                      'inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors',
+                      newTransaction.type === 'income'
+                        ? 'border-green-200 bg-green-50 text-green-700'
+                        : 'border-slate-200 bg-white text-slate-600',
+                    ].join(' ')}
                   >
+                    <Plus className="h-4 w-4" />
                     Ingreso
                   </button>
                   <button
                     type="button"
-                    onClick={() => setNewTx({ ...newTx, type: 'expense' })}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium border ${
-                      newTx.type === 'expense' 
-                        ? 'bg-red-50 border-red-200 text-red-700' 
-                        : 'bg-white border-slate-200 text-slate-600'
-                    }`}
+                    onClick={() => setNewTransaction({ ...newTransaction, type: 'expense' })}
+                    className={[
+                      'inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors',
+                      newTransaction.type === 'expense'
+                        ? 'border-red-200 bg-red-50 text-red-700'
+                        : 'border-slate-200 bg-white text-slate-600',
+                    ].join(' ')}
                   >
+                    <Minus className="h-4 w-4" />
                     Gasto
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Monto</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Monto</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                    $
-                  </div>
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">$</div>
                   <input
                     type="number"
                     required
-                    className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-2xl border border-slate-300 py-3 pl-8 pr-4 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                     placeholder="0.00"
-                    value={newTx.amount}
-                    onChange={(e) => setNewTx({ ...newTx, amount: e.target.value })}
+                    value={newTransaction.amount}
+                    onChange={(event) => setNewTransaction({ ...newTransaction, amount: event.target.value })}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Descripcion</label>
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Ej: Consulta General"
-                  value={newTx.description}
-                  onChange={(e) => setNewTx({ ...newTx, description: e.target.value })}
+                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  placeholder="Ej: Consulta general"
+                  value={newTransaction.description}
+                  onChange={(event) => setNewTransaction({ ...newTransaction, description: event.target.value })}
                 />
               </div>
 
-               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Paciente (Opcional)</label>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Paciente (opcional)</label>
                 <select
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                  value={newTx.patient_id}
-                  onChange={(e) => setNewTx({ ...newTx, patient_id: e.target.value })}
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  value={newTransaction.patient_id}
+                  onChange={(event) => setNewTransaction({ ...newTransaction, patient_id: event.target.value })}
                 >
-                  <option value="">-- General / Ninguno --</option>
-                  {MOCK_PATIENTS.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} ({p.owner_name})</option>
+                  <option value="">General / Ninguno</option>
+                  {patients.map((patient) => (
+                    <option key={patient.id} value={patient.id}>
+                      {patient.name} ({patient.owner_name})
+                    </option>
                   ))}
                 </select>
               </div>
 
-              <div className="pt-2 flex gap-3">
+              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2 border border-slate-300 rounded-lg text-slate-600 font-medium hover:bg-slate-50"
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
+                  className="inline-flex w-full items-center justify-center rounded-2xl bg-indigo-600 px-4 py-3 font-medium text-white transition-colors hover:bg-indigo-700"
                 >
                   Guardar
                 </button>

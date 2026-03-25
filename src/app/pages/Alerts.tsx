@@ -1,14 +1,29 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Bell, Plus, Filter, Check, X, AlertCircle, Clock, Syringe, Phone, Activity, MoreVertical, MessageSquare, Send } from 'lucide-react';
-import { format, parseISO, isBefore, isAfter, addDays, addMonths, differenceInDays } from 'date-fns';
+import {
+  addDays,
+  addMonths,
+  differenceInDays,
+  format,
+  isBefore,
+  parseISO,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '../components/ui/dialog';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import {
+  Activity,
+  AlertCircle,
+  Bell,
+  Check,
+  Clock,
+  Filter,
+  MessageSquare,
+  Phone,
+  Plus,
+  Send,
+  Syringe,
+  X,
+} from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { toast } from 'sonner';
 
 type FilterType = 'all' | 'urgent' | 'this_week' | 'next_month';
@@ -20,30 +35,85 @@ export function Alerts() {
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [selectedReminder, setSelectedReminder] = useState<string | null>(null);
 
-  // Filtrado de recordatorios
-  const filteredReminders = reminders.filter(rem => {
-    if (rem.status !== 'pending') return false;
-    
-    const dueDate = parseISO(rem.due_date);
-    const today = new Date();
-    
-    switch (filter) {
+  const filteredReminders = reminders
+    .filter((reminder) => {
+      if (reminder.status !== 'pending') return false;
+
+      const dueDate = parseISO(reminder.due_date);
+      const today = new Date();
+
+      switch (filter) {
+        case 'urgent':
+          return reminder.priority === 'urgent' || isBefore(dueDate, today);
+        case 'this_week':
+          return isBefore(dueDate, addDays(today, 7));
+        case 'next_month':
+          return isBefore(dueDate, addMonths(today, 1));
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) => {
+      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    });
+
+  const urgentCount = reminders.filter(
+    (reminder) =>
+      reminder.status === 'pending' &&
+      (reminder.priority === 'urgent' || isBefore(parseISO(reminder.due_date), new Date())),
+  ).length;
+
+  const filters = [
+    { id: 'all', label: 'Todos', count: reminders.filter((reminder) => reminder.status === 'pending').length },
+    { id: 'urgent', label: 'Urgentes', count: urgentCount },
+    {
+      id: 'this_week',
+      label: 'Esta semana',
+      count: reminders.filter(
+        (reminder) => reminder.status === 'pending' && isBefore(parseISO(reminder.due_date), addDays(new Date(), 7)),
+      ).length,
+    },
+    {
+      id: 'next_month',
+      label: 'Proximo mes',
+      count: reminders.filter(
+        (reminder) => reminder.status === 'pending' && isBefore(parseISO(reminder.due_date), addMonths(new Date(), 1)),
+      ).length,
+    },
+  ] as const;
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
       case 'urgent':
-        return rem.priority === 'urgent' || isBefore(dueDate, today);
-      case 'this_week':
-        return isBefore(dueDate, addDays(today, 7));
-      case 'next_month':
-        return isBefore(dueDate, addMonths(today, 1));
+        return 'bg-red-50 text-red-700 border-red-200';
+      case 'high':
+        return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'medium':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'low':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       default:
-        return true;
+        return 'bg-slate-50 text-slate-700 border-slate-200';
     }
-  }).sort((a, b) => {
-    // Ordenar por prioridad y fecha
-    const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-    const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
-    if (priorityDiff !== 0) return priorityDiff;
-    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-  });
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'vaccine':
+        return Syringe;
+      case 'surgery_followup':
+        return Activity;
+      case 'call_owner':
+        return Phone;
+      case 'checkup':
+        return Clock;
+      default:
+        return AlertCircle;
+    }
+  };
 
   const handleComplete = (id: string) => {
     updateReminder(id, { status: 'completed' });
@@ -67,297 +137,272 @@ export function Alerts() {
 
   const sendWhatsAppNotification = () => {
     if (!selectedReminder) return;
-    
-    const reminder = reminders.find(r => r.id === selectedReminder);
+
+    const reminder = reminders.find((currentReminder) => currentReminder.id === selectedReminder);
     if (!reminder || !reminder.patient_id) return;
-    
-    const patient = patients.find(p => p.id === reminder.patient_id);
+
+    const patient = patients.find((currentPatient) => currentPatient.id === reminder.patient_id);
     if (!patient) return;
 
-    // Simular envío de WhatsApp
     updateReminder(selectedReminder, { notification_sent: true });
-    
+
     const message = `Hola ${patient.owner_name}, le recordamos: ${reminder.title}. ${reminder.description}`;
     const whatsappUrl = `https://wa.me/${patient.owner_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-    
+
     window.open(whatsappUrl, '_blank');
-    toast.success('Mensaje enviado vía WhatsApp');
+    toast.success('Mensaje enviado por WhatsApp');
     setShowNotificationDialog(false);
     setSelectedReminder(null);
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-50 text-red-700 border-red-200';
-      case 'high': return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'medium': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
-      case 'low': return 'bg-blue-50 text-blue-700 border-blue-200';
-      default: return 'bg-slate-50 text-slate-700 border-slate-200';
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'vaccine': return Syringe;
-      case 'surgery_followup': return Activity;
-      case 'call_owner': return Phone;
-      case 'checkup': return Clock;
-      default: return AlertCircle;
-    }
-  };
-
-  const urgentCount = reminders.filter(r => r.status === 'pending' && (r.priority === 'urgent' || isBefore(parseISO(r.due_date), new Date()))).length;
-
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 animate-in fade-in duration-500 sm:space-y-8">
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <div className="bg-orange-100 p-2 rounded-lg text-orange-700 relative">
-              <Bell className="w-6 h-6" />
+            <div className="relative rounded-2xl bg-orange-100 p-2.5 text-orange-700">
+              <Bell className="h-6 w-6" />
               {urgentCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
                   {urgentCount}
                 </span>
               )}
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Alertas & Recordatorios</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Alertas y recordatorios</h1>
           </div>
-          <p className="text-slate-500 mt-1 text-lg">Gestiona tareas pendientes y notificaciones a clientes</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
+            Prioriza pendientes, notifica a clientes y mantente al dia sin perder claridad en pantallas pequenas.
+          </p>
         </div>
-        
+
         <Dialog open={showNewReminderDialog} onOpenChange={setShowNewReminderDialog}>
           <DialogTrigger asChild>
-            <Button className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Nuevo Recordatorio
-            </Button>
+            <button className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 font-semibold text-white shadow-lg shadow-slate-900/10 transition-all hover:bg-slate-800 sm:w-auto">
+              <Plus className="h-4 w-4" />
+              Nuevo recordatorio
+            </button>
           </DialogTrigger>
-          <NewReminderDialog 
-            onClose={() => setShowNewReminderDialog(false)}
-            patients={patients}
-            addReminder={addReminder}
-          />
+          <NewReminderDialog onClose={() => setShowNewReminderDialog(false)} patients={patients} addReminder={addReminder} />
         </Dialog>
-      </div>
+      </section>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-          <Filter className="w-4 h-4" />
-          Filtrar:
+      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-600">
+          <Filter className="h-4 w-4" />
+          Filtrar por prioridad o ventana de tiempo
         </div>
-        {[
-          { id: 'all', label: 'Todos', count: reminders.filter(r => r.status === 'pending').length },
-          { id: 'urgent', label: 'Urgente', count: urgentCount },
-          { id: 'this_week', label: 'Esta Semana', count: reminders.filter(r => r.status === 'pending' && isBefore(parseISO(r.due_date), addDays(new Date(), 7))).length },
-          { id: 'next_month', label: 'Próximo Mes', count: reminders.filter(r => r.status === 'pending' && isBefore(parseISO(r.due_date), addMonths(new Date(), 1))).length },
-        ].map(f => (
-          <button
-            key={f.id}
-            onClick={() => setFilter(f.id as FilterType)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
-              filter === f.id
-                ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20 border-teal-600'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200'
-            }`}
-          >
-            {f.label} <span className={`ml-1.5 ${filter === f.id ? 'opacity-80' : 'opacity-50'}`}>({f.count})</span>
-          </button>
-        ))}
-      </div>
+        <div className="mobile-chip-scroll">
+          {filters.map((currentFilter) => (
+            <button
+              key={currentFilter.id}
+              onClick={() => setFilter(currentFilter.id)}
+              className={[
+                'rounded-2xl border px-4 py-2 text-sm font-bold transition-all',
+                filter === currentFilter.id
+                  ? 'border-teal-600 bg-teal-600 text-white shadow-lg shadow-teal-600/20'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
+              ].join(' ')}
+            >
+              {currentFilter.label}
+              <span className={`ml-2 ${filter === currentFilter.id ? 'opacity-80' : 'opacity-50'}`}>({currentFilter.count})</span>
+            </button>
+          ))}
+        </div>
+      </section>
 
-      {/* Reminders List */}
       {filteredReminders.length === 0 ? (
-        <div className="bg-white p-16 rounded-3xl border border-slate-200 border-dashed text-center">
-          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Bell className="w-10 h-10 text-slate-300" />
+        <section className="rounded-[28px] border border-dashed border-slate-200 bg-white p-14 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50">
+            <Bell className="h-10 w-10 text-slate-300" />
           </div>
-          <h3 className="text-xl font-bold text-slate-900 mb-2">Sin recordatorios</h3>
-          <p className="text-slate-500">No hay alertas pendientes en este filtro.</p>
-        </div>
+          <h3 className="text-xl font-bold text-slate-900">Sin recordatorios activos</h3>
+          <p className="mt-2 text-sm text-slate-500">No hay alertas pendientes para el filtro actual.</p>
+        </section>
       ) : (
-        <div className="space-y-4">
-          {filteredReminders.map(reminder => {
+        <section className="space-y-4">
+          {filteredReminders.map((reminder) => {
             const dueDate = parseISO(reminder.due_date);
             const isOverdue = isBefore(dueDate, new Date());
             const daysUntil = differenceInDays(dueDate, new Date());
-            const patient = reminder.patient_id ? patients.find(p => p.id === reminder.patient_id) : null;
+            const patient = reminder.patient_id ? patients.find((currentPatient) => currentPatient.id === reminder.patient_id) : null;
             const TypeIcon = getTypeIcon(reminder.type);
 
             return (
-              <div
+              <article
                 key={reminder.id}
-                className={`group bg-white rounded-2xl border-2 p-6 hover:shadow-lg transition-all ${
-                  isOverdue ? 'border-red-200 bg-red-50/30' : 'border-slate-200'
-                }`}
+                className={[
+                  'rounded-[28px] border-2 bg-white p-5 shadow-sm transition-all hover:shadow-lg sm:p-6',
+                  isOverdue ? 'border-red-200 bg-red-50/30' : 'border-slate-200',
+                ].join(' ')}
               >
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className={`p-3 rounded-xl ${getPriorityColor(reminder.priority)}`}>
-                    <TypeIcon className="w-5 h-5" />
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                  <div className={`w-fit rounded-2xl border p-3 ${getPriorityColor(reminder.priority)}`}>
+                    <TypeIcon className="h-5 w-5" />
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg text-slate-900 mb-1">{reminder.title}</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">{reminder.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-bold text-slate-900">{reminder.title}</h3>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">{reminder.description}</p>
                       </div>
-                      
-                      {/* Priority Badge */}
-                      <span className={`ml-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getPriorityColor(reminder.priority)}`}>
-                        {reminder.priority === 'urgent' ? 'Urgente' : 
-                         reminder.priority === 'high' ? 'Alta' :
-                         reminder.priority === 'medium' ? 'Media' : 'Baja'}
+
+                      <span className={`inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${getPriorityColor(reminder.priority)}`}>
+                        {reminder.priority === 'urgent'
+                          ? 'Urgente'
+                          : reminder.priority === 'high'
+                            ? 'Alta'
+                            : reminder.priority === 'medium'
+                              ? 'Media'
+                              : 'Baja'}
                       </span>
                     </div>
 
-                    {/* Meta Info */}
-                    <div className="flex flex-wrap items-center gap-4 mt-3 text-sm">
+                    <div className="mt-4 flex flex-col gap-2 text-sm sm:flex-row sm:flex-wrap sm:items-center">
                       {patient && (
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                          <Activity className="w-4 h-4" />
-                          <span className="font-medium">{patient.name}</span>
-                          <span className="text-slate-400">({patient.owner_name})</span>
+                        <div className="inline-flex max-w-full items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-slate-600">
+                          <Activity className="h-4 w-4 shrink-0 text-slate-400" />
+                          <span className="truncate font-medium">
+                            {patient.name} ({patient.owner_name})
+                          </span>
                         </div>
                       )}
-                      
-                      <div className={`flex items-center gap-1.5 ${isOverdue ? 'text-red-600 font-bold' : 'text-slate-500'}`}>
-                        <Clock className="w-4 h-4" />
-                        <span>
-                          {isOverdue 
-                            ? `Vencida hace ${Math.abs(daysUntil)} días`
-                            : daysUntil === 0 
-                            ? 'Hoy'
-                            : daysUntil === 1
-                            ? 'Mañana'
-                            : `En ${daysUntil} días`
-                          }
+
+                      <div
+                        className={[
+                          'inline-flex max-w-full items-center gap-2 rounded-xl px-3 py-2',
+                          isOverdue ? 'bg-red-50 font-semibold text-red-700' : 'bg-slate-50 text-slate-600',
+                        ].join(' ')}
+                      >
+                        <Clock className="h-4 w-4 shrink-0" />
+                        <span className="truncate">
+                          {isOverdue
+                            ? `Vencida hace ${Math.abs(daysUntil)} dias`
+                            : daysUntil === 0
+                              ? 'Hoy'
+                              : daysUntil === 1
+                                ? 'Manana'
+                                : `En ${daysUntil} dias`}
+                          {` • ${format(dueDate, "d 'de' MMMM", { locale: es })}`}
                         </span>
-                        <span className="text-slate-400">• {format(dueDate, "d 'de' MMMM", { locale: es })}</span>
                       </div>
 
                       {reminder.auto_generated && (
-                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full border border-indigo-100">
+                        <span className="inline-flex w-fit items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-600">
                           Auto
                         </span>
                       )}
 
                       {reminder.notification_sent && (
-                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-full border border-emerald-100 flex items-center gap-1">
-                          <Check className="w-3 h-3" />
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">
+                          <Check className="h-3 w-3" />
                           Notificado
                         </span>
                       )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <button
                         onClick={() => handleComplete(reminder.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-bold transition-colors"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
                       >
-                        <Check className="w-4 h-4" />
+                        <Check className="h-4 w-4" />
                         Completar
                       </button>
 
                       {patient && (
                         <button
                           onClick={() => handleSendNotification(reminder.id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-sm font-bold transition-colors"
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition-colors hover:bg-blue-100"
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <MessageSquare className="h-4 w-4" />
                           Notificar
                         </button>
                       )}
 
                       <button
                         onClick={() => handleDismiss(reminder.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-700 hover:bg-slate-100 rounded-lg text-sm font-bold transition-colors"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="h-4 w-4" />
                         Descartar
                       </button>
 
                       <button
                         onClick={() => handleDelete(reminder.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-sm font-bold transition-colors ml-auto"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition-colors hover:bg-red-100 sm:ml-auto"
                       >
                         Eliminar
                       </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              </article>
             );
           })}
-        </div>
+        </section>
       )}
 
-      {/* Notification Dialog */}
       <Dialog open={showNotificationDialog} onOpenChange={setShowNotificationDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-teal-600" />
-              Enviar Notificación
+              <MessageSquare className="h-5 w-5 text-teal-600" />
+              Enviar notificacion
             </DialogTitle>
           </DialogHeader>
-          
-          {selectedReminder && (() => {
-            const reminder = reminders.find(r => r.id === selectedReminder);
-            const patient = reminder?.patient_id ? patients.find(p => p.id === reminder.patient_id) : null;
-            
-            return (
-              <div className="space-y-4 py-4">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                  <p className="text-sm text-slate-500 mb-1">Cliente</p>
-                  <p className="font-bold text-slate-900">{patient?.owner_name}</p>
-                  <p className="text-sm text-slate-600">{patient?.owner_phone}</p>
-                </div>
 
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                  <p className="text-sm text-blue-600 mb-2 font-medium">Mensaje a enviar:</p>
-                  <p className="text-sm text-slate-700 leading-relaxed">
-                    Hola {patient?.owner_name}, le recordamos: <strong>{reminder?.title}</strong>. {reminder?.description}
-                  </p>
-                </div>
+          {selectedReminder &&
+            (() => {
+              const reminder = reminders.find((currentReminder) => currentReminder.id === selectedReminder);
+              const patient = reminder?.patient_id ? patients.find((currentPatient) => currentPatient.id === reminder.patient_id) : null;
 
-                <div className="flex gap-2">
-                  <Button
-                    onClick={sendWhatsAppNotification}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Enviar por WhatsApp
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowNotificationDialog(false)}
-                  >
-                    Cancelar
-                  </Button>
+              return (
+                <div className="space-y-4 py-4">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-sm text-slate-500">Cliente</p>
+                    <p className="mt-1 font-bold text-slate-900">{patient?.owner_name}</p>
+                    <p className="text-sm text-slate-600">{patient?.owner_phone}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                    <p className="mb-2 text-sm font-medium text-blue-600">Mensaje a enviar</p>
+                    <p className="text-sm leading-6 text-slate-700">
+                      Hola {patient?.owner_name}, le recordamos: <strong>{reminder?.title}</strong>. {reminder?.description}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      onClick={sendWhatsAppNotification}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-green-700"
+                    >
+                      <Send className="h-4 w-4" />
+                      Enviar por WhatsApp
+                    </button>
+                    <button
+                      onClick={() => setShowNotificationDialog(false)}
+                      className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
         </DialogContent>
       </Dialog>
     </div>
   );
 }
 
-// Dialog Component for New Reminder
-function NewReminderDialog({ 
-  onClose, 
-  patients, 
-  addReminder 
-}: { 
-  onClose: () => void; 
-  patients: any[]; 
+function NewReminderDialog({
+  onClose,
+  patients,
+  addReminder,
+}: {
+  onClose: () => void;
+  patients: Array<{ id: string; name: string; owner_name: string }>;
   addReminder: (reminder: any) => void;
 }) {
   const [formData, setFormData] = useState({
@@ -366,12 +411,12 @@ function NewReminderDialog({
     patient_id: '',
     due_date: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
-    type: 'other' as any,
+    type: 'other',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
     addReminder({
       ...formData,
       owner_user_id: 'user_001',
@@ -381,109 +426,115 @@ function NewReminderDialog({
       notification_sent: false,
       created_at: new Date().toISOString(),
     });
-    
+
     toast.success('Recordatorio creado exitosamente');
     onClose();
   };
 
   return (
-    <DialogContent className="sm:max-w-lg">
+    <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Nuevo Recordatorio</DialogTitle>
+        <DialogTitle>Nuevo recordatorio</DialogTitle>
       </DialogHeader>
-      
-      <form onSubmit={handleSubmit} className="space-y-4 py-4">
+
+      <form onSubmit={handleSubmit} className="space-y-4 py-2">
         <div>
-          <Label htmlFor="title">Título *</Label>
-          <Input
-            id="title"
+          <label className="mb-1 block text-sm font-medium text-slate-700">Titulo *</label>
+          <input
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(event) => setFormData({ ...formData, title: event.target.value })}
             required
             placeholder="Ej: Llamar a cliente sobre vacuna"
+            className="w-full rounded-2xl border border-slate-200 px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           />
         </div>
 
         <div>
-          <Label htmlFor="description">Descripción</Label>
-          <Textarea
-            id="description"
+          <label className="mb-1 block text-sm font-medium text-slate-700">Descripcion</label>
+          <textarea
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(event) => setFormData({ ...formData, description: event.target.value })}
             placeholder="Detalles adicionales..."
             rows={3}
+            className="w-full rounded-2xl border border-slate-200 px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
           />
         </div>
 
         <div>
-          <Label htmlFor="patient">Paciente (opcional)</Label>
-          <Select value={formData.patient_id} onValueChange={(val) => setFormData({ ...formData, patient_id: val })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar paciente" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Ninguno</SelectItem>
-              {patients.map(p => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.name} ({p.owner_name})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <label className="mb-1 block text-sm font-medium text-slate-700">Paciente (opcional)</label>
+          <select
+            value={formData.patient_id}
+            onChange={(event) => setFormData({ ...formData, patient_id: event.target.value })}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          >
+            <option value="">Sin asociar</option>
+            {patients.map((patient) => (
+              <option key={patient.id} value={patient.id}>
+                {patient.name} ({patient.owner_name})
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="due_date">Fecha</Label>
-            <Input
-              id="due_date"
+            <label className="mb-1 block text-sm font-medium text-slate-700">Fecha</label>
+            <input
               type="date"
               value={formData.due_date}
-              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+              onChange={(event) => setFormData({ ...formData, due_date: event.target.value })}
               required
+              className="w-full rounded-2xl border border-slate-200 px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             />
           </div>
 
           <div>
-            <Label htmlFor="priority">Prioridad</Label>
-            <Select value={formData.priority} onValueChange={(val: any) => setFormData({ ...formData, priority: val })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Baja</SelectItem>
-                <SelectItem value="medium">Media</SelectItem>
-                <SelectItem value="high">Alta</SelectItem>
-                <SelectItem value="urgent">Urgente</SelectItem>
-              </SelectContent>
-            </Select>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Prioridad</label>
+            <select
+              value={formData.priority}
+              onChange={(event) =>
+                setFormData({ ...formData, priority: event.target.value as 'low' | 'medium' | 'high' | 'urgent' })
+              }
+              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+            >
+              <option value="low">Baja</option>
+              <option value="medium">Media</option>
+              <option value="high">Alta</option>
+              <option value="urgent">Urgente</option>
+            </select>
           </div>
         </div>
 
         <div>
-          <Label htmlFor="type">Tipo</Label>
-          <Select value={formData.type} onValueChange={(val: any) => setFormData({ ...formData, type: val })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="vaccine">Vacuna</SelectItem>
-              <SelectItem value="checkup">Chequeo</SelectItem>
-              <SelectItem value="surgery_followup">Seguimiento Post-Operatorio</SelectItem>
-              <SelectItem value="medication">Medicación</SelectItem>
-              <SelectItem value="call_owner">Llamar a Dueño</SelectItem>
-              <SelectItem value="other">Otro</SelectItem>
-            </SelectContent>
-          </Select>
+          <label className="mb-1 block text-sm font-medium text-slate-700">Tipo</label>
+          <select
+            value={formData.type}
+            onChange={(event) => setFormData({ ...formData, type: event.target.value })}
+            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          >
+            <option value="vaccine">Vacuna</option>
+            <option value="checkup">Chequeo</option>
+            <option value="surgery_followup">Seguimiento postoperatorio</option>
+            <option value="medication">Medicacion</option>
+            <option value="call_owner">Llamar al dueno</option>
+            <option value="other">Otro</option>
+          </select>
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 font-medium text-slate-600 transition-colors hover:bg-slate-50 sm:w-auto"
+          >
             Cancelar
-          </Button>
-          <Button type="submit" className="bg-teal-600 hover:bg-teal-700">
-            Crear Recordatorio
-          </Button>
+          </button>
+          <button
+            type="submit"
+            className="inline-flex w-full items-center justify-center rounded-2xl bg-teal-600 px-4 py-3 font-medium text-white transition-colors hover:bg-teal-700 sm:w-auto"
+          >
+            Crear recordatorio
+          </button>
         </DialogFooter>
       </form>
     </DialogContent>
