@@ -332,7 +332,7 @@ export function Agenda() {
       </section>
 
       <Dialog open={showNewAppointment} onOpenChange={setShowNewAppointment}>
-        <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="max-h-[calc(100dvh-1.5rem)] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Nueva cita</DialogTitle>
           </DialogHeader>

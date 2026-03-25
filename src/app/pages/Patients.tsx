@@ -92,7 +92,7 @@ export function Patients() {
           </Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-sm animate-in fade-in duration-200" />
-            <Dialog.Content className="fixed inset-x-3 bottom-3 top-auto z-50 max-h-[88vh] overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl outline-none animate-in slide-in-from-bottom-4 duration-200 sm:inset-x-[50%] sm:top-[50%] sm:bottom-auto sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7">
+            <Dialog.Content className="fixed inset-x-3 bottom-3 top-auto z-50 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl outline-none animate-in slide-in-from-bottom-4 duration-200 sm:inset-x-[50%] sm:top-[50%] sm:bottom-auto sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-7">
               <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
                   <Dialog.Title className="text-xl font-bold text-slate-900">Registrar nuevo paciente</Dialog.Title>

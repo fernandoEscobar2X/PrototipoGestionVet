@@ -28,8 +28,8 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top_left,_rgba(20,184,166,0.12),_transparent_35%),linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)]">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col lg:flex-row">
+    <div className="min-h-[100dvh] overflow-x-clip bg-[radial-gradient(circle_at_top_left,_rgba(20,184,166,0.12),_transparent_35%),linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)]">
+      <div className="mx-auto flex min-h-[100dvh] max-w-7xl flex-col lg:flex-row">
         <div className="flex w-full flex-col justify-center px-5 py-8 sm:px-8 lg:w-1/2 lg:px-16 lg:py-12">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-8 rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-xl shadow-slate-200/70 backdrop-blur sm:p-6 lg:hidden">

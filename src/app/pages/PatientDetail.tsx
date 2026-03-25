@@ -200,7 +200,7 @@ export function PatientDetail() {
       </section>
 
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
-        <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="max-h-[calc(100dvh-1.5rem)] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Editar paciente</DialogTitle>
           </DialogHeader>

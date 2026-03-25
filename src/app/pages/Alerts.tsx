@@ -344,7 +344,7 @@ export function Alerts() {
       )}
 
       <Dialog open={showNotificationDialog} onOpenChange={setShowNotificationDialog}>
-        <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="max-h-[calc(100dvh-1.5rem)] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-teal-600" />
@@ -432,7 +432,7 @@ function NewReminderDialog({
   };
 
   return (
-    <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-lg">
+    <DialogContent className="max-h-[calc(100dvh-1.5rem)] overflow-y-auto sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>Nuevo recordatorio</DialogTitle>
       </DialogHeader>

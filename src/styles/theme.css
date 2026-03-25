@@ -2,6 +2,8 @@
 
 :root {
   --font-size: 16px;
+  --mobile-header-height: 4rem;
+  --mobile-bottom-nav-height: 5.75rem;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
   --card: #ffffff;
@@ -130,10 +132,19 @@
     min-height: 100%;
   }
 
+  @supports (min-height: 100dvh) {
+    html,
+    body,
+    #root {
+      min-height: 100dvh;
+    }
+  }
+
   body {
     @apply bg-background text-foreground;
     min-width: 320px;
     overflow-x: clip;
+    overscroll-behavior-y: contain;
     text-rendering: optimizeLegibility;
   }
 
@@ -145,7 +156,10 @@
   html {
     font-size: var(--font-size);
     overflow-x: clip;
+    overscroll-behavior-y: contain;
     scroll-behavior: smooth;
+    scroll-padding-top: calc(env(safe-area-inset-top) + var(--mobile-header-height) + 0.75rem);
+    scroll-padding-bottom: calc(env(safe-area-inset-bottom) + var(--mobile-bottom-nav-height) + 1rem);
     -webkit-text-size-adjust: 100%;
   }
 
@@ -212,6 +226,10 @@
     outline: 2px solid color-mix(in srgb, var(--ring) 55%, transparent);
     outline-offset: 2px;
   }
+
+  #root {
+    isolation: isolate;
+  }
 }
 
 @layer utilities {
@@ -248,8 +266,32 @@
     display: none;
   }
 
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
   .safe-bottom {
     padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  }
+
+  .page-bottom-offset {
+    padding-bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom) + 1rem);
+  }
+
+  .mobile-nav-shell {
+    min-height: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom));
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 1rem;
+    scroll-padding-bottom: 1rem;
+  }
+
+  .page-bottom-offset {
+    padding-bottom: 2.5rem;
   }
 }
 

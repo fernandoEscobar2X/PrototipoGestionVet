@@ -236,7 +236,7 @@ export function CashRegister() {
 
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/55 p-3 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
-          <div className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-[28px] bg-white shadow-2xl">
+          <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-[28px] bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-4">
               <h3 className="text-lg font-bold text-slate-800">Registrar operacion</h3>
               <button

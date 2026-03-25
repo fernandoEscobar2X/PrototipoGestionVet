@@ -62,7 +62,7 @@ export function Layout() {
   };
 
   return (
-    <div className="relative flex min-h-screen overflow-x-clip bg-slate-100 text-slate-900">
+    <div className="relative min-h-[100dvh] overflow-x-clip bg-slate-100 text-slate-900 lg:flex">
       {sidebarOpen && (
         <button
           type="button"
@@ -74,7 +74,7 @@ export function Layout() {
 
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-40 flex w-[min(20rem,88vw)] max-w-full flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out lg:relative lg:z-0 lg:w-72 lg:translate-x-0 lg:shadow-none',
+          'fixed inset-y-0 left-0 z-40 flex w-[min(20rem,88vw)] max-w-full flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:z-0 lg:h-[100dvh] lg:w-72 lg:translate-x-0 lg:shadow-none',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
@@ -182,7 +182,7 @@ export function Layout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur lg:hidden">
+        <header className="safe-top sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur lg:hidden">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <button
@@ -213,14 +213,14 @@ export function Layout() {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-clip px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
-          <div className="mx-auto w-full max-w-7xl space-y-6 pb-24 safe-bottom lg:space-y-8 lg:pb-10">
+        <main className="min-w-0 flex-1 overflow-x-clip px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
+          <div className="page-bottom-offset mx-auto w-full max-w-7xl space-y-6 lg:space-y-8">
             <Outlet />
           </div>
         </main>
       </div>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/96 px-2 pb-2 pt-2 backdrop-blur lg:hidden">
+      <nav className="mobile-nav-shell fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/96 px-2 pt-2 backdrop-blur lg:hidden">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
           {mobileNavItems.map((item) => (
             <NavLink
