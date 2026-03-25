@@ -43,7 +43,8 @@ export function Layout() {
 
   React.useEffect(() => {
     setSidebarOpen(false);
-  }, [location.pathname]);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname, location.search]);
 
   React.useEffect(() => {
     const originalOverflow = document.body.style.overflow;
